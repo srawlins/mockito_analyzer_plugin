@@ -6,27 +6,28 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:collection/collection.dart';
+import 'package:test_analyzer_plugin/src/utils.dart';
 
 class MockitoArgs extends MultiAnalysisRule {
-  static const LintCode argMatcherOutsideStub = LintCode(
+  static const LintCode _argMatcherOutsideStub = LintCode(
     'arg_matcher_outside_stub',
     'An arg matcher must only be used when creating a method stub',
-    correctionMessage: 'Try dotdotdot',
+    correctionMessage: 'Try using the arg matcher when creating a method stub',
   );
 
-  static const LintCode argMatcherMissingNamedArg = LintCode(
+  static const LintCode _argMatcherMissingNamedArg = LintCode(
     'arg_matcher_missing_named_arg',
     "An arg matcher passed as a named argument must itself have a 'named' argument",
     correctionMessage: "Try specifying `named: '{0}'`",
   );
 
-  static const LintCode argMatcherMustBeNamed = LintCode(
+  static const LintCode _argMatcherMustBeNamed = LintCode(
     'arg_matcher_must_be_named',
     "'{0}' must be used when passed as a named argument",
     correctionMessage: "Try using '{0}'",
   );
 
-  static const LintCode argMatcherHasWrongName = LintCode(
+  static const LintCode _argMatcherHasWrongName = LintCode(
     'arg_matcher_has_wrong_name',
     "'{0}' must be specified as the arg matcher name",
     correctionMessage: "Try specifying `named: '{0}'`",
@@ -35,11 +36,11 @@ class MockitoArgs extends MultiAnalysisRule {
   MockitoArgs()
     : super(
         name: 'mockito_args',
-        description: r"Avoid using 'FutureOr<void>' as the type of a result.",
+        description: r"Use mockito arg matchers properly.",
       );
 
   @override
-  List<DiagnosticCode> get diagnosticCodes => [argMatcherOutsideStub];
+  List<DiagnosticCode> get diagnosticCodes => [_argMatcherOutsideStub];
 
   @override
   void registerNodeProcessors(
@@ -58,8 +59,6 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   _Visitor(this.rule, this.context);
 
-  void _checkArgMatcherName() {}
-
   @override
   void visitMethodInvocation(MethodInvocation node) {
     if (!node.methodName.isArgMatcher) return;
@@ -73,49 +72,7 @@ class _Visitor extends SimpleAstVisitor<void> {
       parent: ArgumentList(parent: MethodInvocation invocation),
     )) {
       _checkArgMatcherOutsideStub(node, invocation);
-
-      var expectedArgName = expectedArgLabel.label.name;
-      Expression? argIndicatingName;
-      var argIndicatingNameIsPositional =
-          node.methodName.isAnyNamed || node.methodName.isCaptureAnyNamed;
-      if (argIndicatingNameIsPositional) {
-        argIndicatingName = node.argumentList.arguments.firstOrNull;
-        if (argIndicatingName == null) {
-          // The _required_ argument is missing, so there is a compile-time
-          // error. Don't bother reporting anything.
-          return;
-        }
-      } else {
-        var argMatcherNamedArg = node.argumentList.arguments
-            .whereType<NamedExpression>()
-            .firstWhereOrNull((a) => a.name.label.name == 'named');
-        if (argMatcherNamedArg == null) {
-          // Something like `when(a.b(c: argThat(7)))`.
-          rule.reportAtNode(
-            node,
-            diagnosticCode: MockitoArgs.argMatcherMissingNamedArg,
-            arguments: [expectedArgName],
-          );
-          return;
-        }
-        argIndicatingName = argMatcherNamedArg.expression;
-      }
-
-      if (argIndicatingName case SimpleStringLiteral(
-        stringValue: var nameValue?,
-      )) {
-        if (expectedArgName != nameValue) {
-          // Something like `when(a.b(c: argThat(7, named: 'd')))`.
-          rule.reportAtNode(
-            node,
-            diagnosticCode: MockitoArgs.argMatcherHasWrongName,
-            arguments: [expectedArgName],
-          );
-        }
-      } else {
-        // Either the argument expression is not a SimpleStringLiteral, or
-        // it's value couldn't be resolved. Don't worry about it.
-      }
+      _checkArgMatcherName(node, expectedArgLabel);
     }
   }
 
@@ -137,9 +94,54 @@ class _Visitor extends SimpleAstVisitor<void> {
       }[node.name]!;
       rule.reportAtNode(
         node,
-        diagnosticCode: MockitoArgs.argMatcherMustBeNamed,
+        diagnosticCode: MockitoArgs._argMatcherMustBeNamed,
         arguments: [namedEquivalent],
       );
+    }
+  }
+
+  void _checkArgMatcherName(MethodInvocation node, Label expectedArgLabel) {
+    var expectedArgName = expectedArgLabel.label.name;
+    Expression? argIndicatingName;
+    var argIndicatingNameIsPositional =
+        node.methodName.isAnyNamed || node.methodName.isCaptureAnyNamed;
+    if (argIndicatingNameIsPositional) {
+      argIndicatingName = node.argumentList.arguments.firstOrNull;
+      if (argIndicatingName == null) {
+        // The _required_ argument is missing, so there is a compile-time
+        // error. Don't bother reporting anything.
+        return;
+      }
+    } else {
+      var argMatcherNamedArg = node.argumentList.arguments
+          .whereType<NamedExpression>()
+          .firstWhereOrNull((a) => a.name.label.name == 'named');
+      if (argMatcherNamedArg == null) {
+        // Something like `when(a.b(c: argThat(7)))`.
+        rule.reportAtNode(
+          node,
+          diagnosticCode: MockitoArgs._argMatcherMissingNamedArg,
+          arguments: [expectedArgName],
+        );
+        return;
+      }
+      argIndicatingName = argMatcherNamedArg.expression;
+    }
+
+    if (argIndicatingName case SimpleStringLiteral(
+      stringValue: var nameValue?,
+    )) {
+      if (expectedArgName != nameValue) {
+        // Something like `when(a.b(c: argThat(7, named: 'd')))`.
+        rule.reportAtNode(
+          node,
+          diagnosticCode: MockitoArgs._argMatcherHasWrongName,
+          arguments: [expectedArgName],
+        );
+      }
+    } else {
+      // Either the argument expression is not a SimpleStringLiteral, or
+      // it's value couldn't be resolved. Don't worry about it.
     }
   }
 
@@ -152,60 +154,17 @@ class _Visitor extends SimpleAstVisitor<void> {
       // TODO(srawlins): Check for implicit `this`. collection_unrelated has
       // examples.
 
-      // E.g. `print(argThat(isNotNull))`
+      // E.g. `print(argThat(isNotNull))`.
       rule.reportAtNode(
         errorNode,
-        diagnosticCode: MockitoArgs.argMatcherOutsideStub,
+        diagnosticCode: MockitoArgs._argMatcherOutsideStub,
       );
     } else {
       if (targetType is InterfaceType && targetType.extendsMock) return;
       rule.reportAtNode(
         errorNode,
-        diagnosticCode: MockitoArgs.argMatcherOutsideStub,
+        diagnosticCode: MockitoArgs._argMatcherOutsideStub,
       );
     }
   }
 }
-
-extension on InterfaceType {
-  bool get extendsMock {
-    if (element.name == 'Mock' && element.library.uri == _mockLibrary) {
-      return true;
-    }
-
-    if (element.isSynthetic) return false;
-
-    return element.allSupertypes.any(
-      (i) => i.element.name == 'Mock' && i.element.library.uri == _mockLibrary,
-    );
-  }
-}
-
-extension on SimpleIdentifier {
-  bool get isAny => name == 'any' && element?.library?.uri == _mockLibrary;
-
-  bool get isAnyNamed =>
-      name == 'anyNamed' && element?.library?.uri == _mockLibrary;
-
-  bool get isArgThat =>
-      name == 'argThat' && element?.library?.uri == _mockLibrary;
-
-  bool get isCaptureAny =>
-      name == 'captureAny' && element?.library?.uri == _mockLibrary;
-
-  bool get isCaptureAnyNamed =>
-      name == 'captureAnyNamed' && element?.library?.uri == _mockLibrary;
-
-  bool get isCaptureThat =>
-      name == 'captureThat' && element?.library?.uri == _mockLibrary;
-
-  bool get isArgMatcher =>
-      isAny ||
-      isAnyNamed ||
-      isArgThat ||
-      isCaptureAny ||
-      isCaptureAnyNamed ||
-      isCaptureThat;
-}
-
-final _mockLibrary = Uri.parse('package:mockito/src/mock.dart');
