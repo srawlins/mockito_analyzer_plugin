@@ -6,7 +6,7 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/dart/element/type.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:collection/collection.dart';
-import 'package:test_analyzer_plugin/src/utils.dart';
+import 'package:mockito_analyzer_plugin/src/utils.dart';
 
 class MockitoWhen extends AnalysisRule {
   static const LintCode code = LintCode(

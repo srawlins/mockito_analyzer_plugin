@@ -1,19 +1,19 @@
-name: test_analyzer_plugin
-description: An analyzer plugin to report improper usage of the test package.
-version: 1.0.0
+name: mockito_analyzer_plugin
+description: An analyzer plugin with guard rails for using mockito
+version: 0.1.0
 publish_to: none
 
 environment:
   sdk: ^3.8.0
 
 dependencies:
-  analysis_server_plugin: any
+  analysis_server_plugin: ^0.2.2
   analyzer: ^8.0.0
-  analyzer_plugin: any
-  analyzer_testing: any
-  collection: any
+  analyzer_plugin: ^0.13.6
+  analyzer_testing: ^0.1.2
+  collection: ^1.19.0
 
 dev_dependencies:
-  test: any
-  test_reflective_loader: any
+  test: ^1.26.0
+  test_reflective_loader: ^0.3.0
 

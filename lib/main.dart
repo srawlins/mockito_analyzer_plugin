@@ -1,6 +1,6 @@
 import 'package:analysis_server_plugin/plugin.dart';
 import 'package:analysis_server_plugin/registry.dart';
-import 'package:test_analyzer_plugin/src/rules/mockito_when.dart';
+import 'package:mockito_analyzer_plugin/src/rules/mockito_when.dart';
 
 import 'src/rules/mockito_args.dart';
 
