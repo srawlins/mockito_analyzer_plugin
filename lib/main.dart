@@ -8,6 +8,9 @@ final plugin = MockitoPackagePlugin();
 
 class MockitoPackagePlugin extends Plugin {
   @override
+  String get name => 'mockito_plugin';
+
+  @override
   void register(PluginRegistry registry) {
     registry.registerWarningRule(MockitoWhen());
     registry.registerWarningRule(MockitoArgs());
