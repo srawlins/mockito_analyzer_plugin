@@ -11,14 +11,14 @@ import 'package:mockito_analyzer_plugin/src/utils.dart';
 class MockitoWhen extends AnalysisRule {
   static const LintCode code = LintCode(
     'mockito_when',
-    "Only use a Mock class inside a call to 'when'.",
-    correctionMessage: "Try using a Mock class inside the call to 'when'",
+    "Only use a Mock object inside a call to 'when'.",
+    correctionMessage: "Try using a Mock object inside the call to 'when'",
   );
 
   MockitoWhen()
     : super(
         name: 'mockito_when',
-        description: r"Only use a Mock class inside a call to 'when'.",
+        description: r"Only use a Mock object inside a call to 'when'.",
       );
 
   @override

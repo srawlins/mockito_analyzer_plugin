@@ -1,10 +1,11 @@
 // ignore_for_file: non_constant_identifier_names
 
 import 'package:analyzer/src/lint/registry.dart';
-import 'package:analyzer/utilities/package_config_file_builder.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
 import 'package:mockito_analyzer_plugin/src/rules/mockito_args.dart';
 import 'package:test_reflective_loader/test_reflective_loader.dart';
+
+import '../with_mockito_package.dart';
 
 void main() {
   defineReflectiveSuite(() {
@@ -13,29 +14,14 @@ void main() {
 }
 
 @reflectiveTest
-class MockitoArgsTest extends AnalysisRuleTest {
+class MockitoArgsTest extends AnalysisRuleTest with WithMockitoPackage {
   @override
   String get analysisRule => 'mockito_args';
 
   @override
   void setUp() {
     Registry.ruleRegistry.registerLintRule(MockitoArgs());
-
     super.setUp();
-
-    var mockitoPath = '/packages/mockito';
-    newFile('$mockitoPath/lib/src/mock.dart', '''
-class Mock {}
-Expectation get when => (_) {}
-Null get any => null;
-Null anyNamed(String named) => null;
-Null argThat(Object? matcher, {String? named}) => null;
-typedef Expectation = void Function(Object? o);
-''');
-    writeTestPackageConfig(
-      PackageConfigFileBuilder()
-        ..add(name: 'mockito', rootPath: convertPath(mockitoPath)),
-    );
   }
 
   void test_any_notStubCall_badTarget() async {
