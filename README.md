@@ -13,4 +13,7 @@ for:
 * when an unnamed arg matcher is used as an argument for a named parameter
 * when a named arg matcher is used as an argument for a named parameter with a
   different name
-* when `when` is given a stub call on a _non_ Mock instance
+* when a call to `when` is given a stub call on a _non_ Mock instance
+* when a call to `when` is not followed by a stub (`thenReturn`,
+  `thenReturnInOrder`, `thenThrow`, or `thenAnswer`)
+* when a call to `verify` is followed by `.called(0)`

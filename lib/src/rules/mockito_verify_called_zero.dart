@@ -6,19 +6,18 @@ import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:analyzer/error/error.dart';
 import 'package:mockito_analyzer_plugin/src/utils.dart';
 
-class MockitoMissingStub extends AnalysisRule {
+class MockitoVerifyCalledZero extends AnalysisRule {
   static const LintCode code = LintCode(
-    'mockito_missing_stub',
-    "A call to 'when' must be followed by a stub.",
-    correctionMessage:
-        "Try calling 'thenReturn', 'thenReturnInOrder', 'thenAnswer', or "
-        "'thenThrow' after the 'when' call",
+    'mockito_verify_called_zero',
+    "Do not use 'called(0)' to verify a method is not called.",
+    correctionMessage: "Try using 'verifyNever' instead",
   );
 
-  MockitoMissingStub()
+  MockitoVerifyCalledZero()
     : super(
-        name: 'mockito_missing_stub',
-        description: r"A call to 'when' must be followed by a stub.",
+        name: 'mockito_verify_called_zero',
+        description:
+            r"Do not use 'called(0)' to verify a method is not called.",
       );
 
   @override
@@ -42,18 +41,18 @@ class _Visitor extends SimpleAstVisitor<void> {
 
   @override
   void visitFunctionExpressionInvocation(FunctionExpressionInvocation node) {
-    if (!node.function.isWhen) return;
+    if (!node.function.isVerify) return;
 
     if (node.parent case MethodInvocation parentInvocation) {
-      if (const [
-        'thenReturn',
-        'thenReturnInOrder',
-        'thenThrow',
-        'thenAnswer',
-      ].contains(parentInvocation.methodName.name)) {
-        return;
+      if (parentInvocation.methodName.name != 'called') return;
+      if (parentInvocation.argumentList.arguments.isEmpty) return;
+      var firstArgument = parentInvocation.argumentList.arguments.first;
+      if (firstArgument is IntegerLiteral &&
+          firstArgument.literal.lexeme == '0') {
+        var offset = parentInvocation.operator!.offset;
+        var length = parentInvocation.end - offset;
+        rule.reportAtOffset(offset, length);
       }
     }
-    rule.reportAtNode(node.function);
   }
 }

@@ -47,7 +47,7 @@ class C {
   Null m(int p) => null;
 }
 ''',
-      [lint(56, 12)],
+      [lint(56, 4)],
     );
   }
 }

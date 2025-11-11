@@ -50,7 +50,7 @@ class C {
   void m({Object? p}) {}
 }
 ''',
-      [lint(63, 13, name: 'arg_matcher_outside_stub')],
+      [lint(63, 8, name: 'arg_matcher_outside_stub')],
     );
   }
 
@@ -65,7 +65,7 @@ class C {
   void m(Object? p) {}
 }
 ''',
-      [lint(60, 10, name: 'arg_matcher_outside_stub')],
+      [lint(60, 7, name: 'arg_matcher_outside_stub')],
     );
   }
 
@@ -77,7 +77,7 @@ void f() {
   print(argThat(1));
 }
 ''',
-      [lint(59, 10, name: 'arg_matcher_outside_stub')],
+      [lint(59, 7, name: 'arg_matcher_outside_stub')],
     );
   }
 
@@ -119,7 +119,7 @@ class C extends Mock {
   Null m({Object? p}) => null;
 }
 ''',
-      [lint(68, 13, name: 'arg_matcher_has_wrong_name')],
+      [lint(77, 3, name: 'arg_matcher_has_wrong_name')],
     );
   }
 
@@ -134,7 +134,7 @@ class C extends Mock {
   Null m({Object? p}) => null;
 }
 ''',
-      [lint(68, 10, name: 'arg_matcher_missing_named_arg')],
+      [lint(68, 7, name: 'arg_matcher_missing_named_arg')],
     );
   }
 
@@ -149,7 +149,7 @@ class C extends Mock {
   Null m({Object? p}) => null;
 }
 ''',
-      [lint(68, 22, name: 'arg_matcher_has_wrong_name')],
+      [lint(86, 3, name: 'arg_matcher_has_wrong_name')],
     );
   }
 }

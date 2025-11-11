@@ -64,14 +64,14 @@ class _Visitor extends SimpleAstVisitor<void> {
     if (!node.methodName.isArgMatcher) return;
 
     if (node.parent case ArgumentList(parent: MethodInvocation invocation)) {
-      _checkArgMatcherOutsideStub(node, invocation);
+      _checkArgMatcherOutsideStub(node.methodName, invocation);
     }
 
     if (node.parent case NamedExpression(
       name: var expectedArgLabel,
       parent: ArgumentList(parent: MethodInvocation invocation),
     )) {
-      _checkArgMatcherOutsideStub(node, invocation);
+      _checkArgMatcherOutsideStub(node.methodName, invocation);
       _checkArgMatcherName(node, expectedArgLabel);
     }
   }
@@ -119,7 +119,7 @@ class _Visitor extends SimpleAstVisitor<void> {
       if (argMatcherNamedArg == null) {
         // Something like `when(a.b(c: argThat(7)))`.
         rule.reportAtNode(
-          node,
+          node.methodName,
           diagnosticCode: MockitoArgs._argMatcherMissingNamedArg,
           arguments: [expectedArgName],
         );
@@ -134,7 +134,7 @@ class _Visitor extends SimpleAstVisitor<void> {
       if (expectedArgName != nameValue) {
         // Something like `when(a.b(c: argThat(7, named: 'd')))`.
         rule.reportAtNode(
-          node,
+          argIndicatingName,
           diagnosticCode: MockitoArgs._argMatcherHasWrongName,
           arguments: [expectedArgName],
         );

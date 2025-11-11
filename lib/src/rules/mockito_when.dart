@@ -67,7 +67,7 @@ class _Visitor extends SimpleAstVisitor<void> {
     }
 
     if (targetType is! InterfaceType || !targetType.extendsMock) {
-      rule.reportAtNode(node);
+      rule.reportAtNode(node.function);
     }
   }
 }

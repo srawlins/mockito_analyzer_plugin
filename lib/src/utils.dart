@@ -17,6 +17,17 @@ extension InterfaceTypeExtension on InterfaceType {
 }
 
 extension ExpressionExtension on Expression {
+  /// Whether this expression represents the 'verify' function declared in the
+  /// mockito package.
+  bool get isVerify {
+    var self = this;
+    return self is SimpleIdentifier &&
+        self.name == 'verify' &&
+        self.element.isDeclaredInMockito;
+  }
+
+  /// Whether this expression represents the 'when' function declared in the
+  /// mockito package.
   bool get isWhen {
     var self = this;
     return self is SimpleIdentifier &&

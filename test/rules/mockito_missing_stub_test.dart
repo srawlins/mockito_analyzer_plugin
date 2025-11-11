@@ -21,7 +21,6 @@ class MockitoMissingStubTest extends AnalysisRuleTest with WithMockitoPackage {
   @override
   void setUp() {
     Registry.ruleRegistry.registerLintRule(MockitoMissingStub());
-
     super.setUp();
   }
 
@@ -84,7 +83,7 @@ class C extends Mock {
   Null m(int p) => null;
 }
 ''',
-      [lint(56, 12)],
+      [lint(56, 4)],
     );
   }
 }
