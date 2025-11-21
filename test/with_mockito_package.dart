@@ -1,13 +1,9 @@
-import 'package:analyzer/src/lint/registry.dart';
 import 'package:analyzer/utilities/package_config_file_builder.dart';
 import 'package:analyzer_testing/analysis_rule/analysis_rule.dart';
-import 'package:mockito_analyzer_plugin/src/rules/mockito_missing_stub.dart';
 
 mixin WithMockitoPackage on AnalysisRuleTest {
   @override
   void setUp() {
-    Registry.ruleRegistry.registerLintRule(MockitoMissingStub());
-
     super.setUp();
 
     var mockitoPath = '/packages/mockito';
